@@ -14,7 +14,7 @@
   "metodo": {
     "pivote": 2,
     "atrPeriodo": 14,
-    "fuerzaImpulsoAtr": 1.5,
+    "fuerzaImpulsoAtr": 1.3,
     "confluenciasMinimas": 2,
     "bufferSlAtr": 0.25,
     "ratioTp": 2,
@@ -22,11 +22,11 @@
     "ventanaConfirmacion": 3,
     "lookbackVelaContraria": 15,
     "porSesion": {
-      "sidney": { "confluenciasMinimas": 3, "fuerzaImpulsoAtr": 1.8, "ratioTp": 2 },
-      "asia": { "confluenciasMinimas": 3, "fuerzaImpulsoAtr": 1.8, "ratioTp": 2 },
-      "tokio": { "confluenciasMinimas": 3, "fuerzaImpulsoAtr": 1.8, "ratioTp": 2 },
-      "londres": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.5, "ratioTp": 2 },
-      "ny": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.5, "ratioTp": 2 }
+      "sidney": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.4, "ratioTp": 2 },
+      "asia": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.4, "ratioTp": 2 },
+      "tokio": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.4, "ratioTp": 2 },
+      "londres": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.3, "ratioTp": 2 },
+      "ny": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.3, "ratioTp": 2 }
     }
   },
   "simbolos": [
