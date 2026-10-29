@@ -1,0 +1,15 @@
+{
+  "name": "burs-signals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bot de señales basado en el método publico de BURS Advisory",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "scan": "node --env-file-if-exists=.env src/scan.mjs",
+    "backtest": "node --env-file-if-exists=.env src/backtest.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

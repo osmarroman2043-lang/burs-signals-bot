@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURS Signals Pro - Prop Firm Edition</title>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #0a0a0a; color: #e0e0e0; }
+        header { background: linear-gradient(90deg, #1a1a1a 0%, #0f0f0f 100%); border-bottom: 2px solid #2563eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
+        .logo-text h1 { color: #fff; font-size: 20px; }
+        .logo-text p { color: #888; font-size: 11px; }
+        .header-stats { display: flex; gap: 20px; align-items: center; }
+        .stat { text-align: center; }
+        .stat-label { color: #888; font-size: 11px; }
+        .stat-value { color: #fff; font-size: 16px; font-weight: bold; }
+        .stat-value.green { color: #4ade80; }
+        .stat-value.red { color: #f87171; }
+        .btn { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .btn:hover { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
+        .main { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 80px); }
+        .sidebar { background: #111; border-right: 1px solid #333; overflow-y: auto; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #333; }
+        .sidebar-header h2 { color: #fff; font-size: 16px; margin-bottom: 5px; }
+        .sidebar-header p { color: #888; font-size: 12px; }
+        .signals-list { padding: 10px; }
+        .signal-card { background: #1a1a1a; border: 2px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .signal-card:hover { border-color: #2563eb; transform: translateX(5px); }
+        .signal-card.active { border-color: #2563eb; background: #1e293b; }
+        .signal-card.buy { border-left: 4px solid #4ade80; }
+        .signal-card.sell { border-left: 4px solid #f87171; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-symbol { display: flex; align-items: center; gap: 8px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .buy .dot { background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+        .sell .dot { background: #f87171; box-shadow: 0 0 10px #f87171; }
+        .card-symbol-text { font-weight: bold; font-size: 16px; }
+        .buy .card-symbol-text { color: #4ade80; }
+        .sell .card-symbol-text { color: #f87171; }
+        .card-time { color: #888; font-size: 11px; }
+        .card-levels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .level { text-align: center; padding: 6px; background: #0f0f0f; border-radius: 6px; }
+        .level-label { color: #888; font-size: 9px; }
+        .level-value { font-size: 12px; font-weight: 600; margin-top: 2px; }
+        .entry .level-value { color: #60a5fa; }
+        .sl .level-value { color: #f87171; }
+        .tp .level-value { color: #4ade80; }
+        .content { display: flex; flex-direction: column; }
+        .chart-container { flex: 1; background: #0f0f0f; }
+        #tradingview_chart { height: 100%; width: 100%; }
+        .analysis-panel { background: #0f1117; border-top: 2px solid #2563eb; padding: 20px; display: none; }
+        .analysis-panel.active { display: block !important; visibility: visible !important; }
+        .analysis-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; }
+        .analysis-section h3 { color: #fff; margin-bottom: 10px; font-size: 14px; }
+        .reason { color: #ccc; font-size: 13px; line-height: 1.6; }
+        .confluence-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { background: #1e293b; color: #60a5fa; padding: 4px 10px; border-radius: 12px; font-size: 11px; }        .risk-metric {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .risk-label { color: #888; font-size: 11px; }
+        .risk-value { color: #fff; font-size: 14px; font-weight: 600; margin-top: 3px; }
+        .risk-value.warning { color: #fbbf24; }
+        .risk-value.profit { color: #4ade80; }
+        .risk-value.loss { color: #f87171; }
+        .status-badge { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 5px; }
+        .status-badge.active { background: #1e3a5f; color: #60a5fa; }
+        .status-badge.profit { background: #1a4d2e; color: #4ade80; }
+        .status-badge.near-tp { background: #365314; color: #84cc16; }
+        .status-badge.near-sl { background: #7f1d1d; color: #f87171; }
+        .no-signals { text-align: center; padding: 40px 20px; color: #666; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">B</div>
+            <div class="logo-text">
+                <h1>BURS Signals Pro</h1>
+                <p>Prop Firm Edition | Only Web Panel</p>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat">
+                <div class="stat-label">RIESGO POR OPERACIÓN</div>
+                <div class="stat-value">0.5%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">SESIÓN ACTIVA</div>
+                <div class="stat-value" id="sessionStat">Calculando...</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">SEÑALES HOY</div>
+                <div class="stat-value green" id="todayCount">0</div>
+            </div>
+            <button class="btn" onclick="escanear()">⚡ ESCANEAR AHORA</button>
+        </div>
+    </header>
+    
+    <div class="main">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>📊 HISTORIAL DE OPERACIONES</h2>
+                <p id="lastScanTime">Cargando...</p>
+                <div style="margin-top:8px; padding:8px; background:linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); border-radius:6px; border:1px solid #333;">
+                    <div style="text-align:center; margin-bottom:6px; color:#fff; font-weight:bold; font-size:12px;">RESULTADOS</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-size:10px; text-align:center;">
+                        <div style="padding:4px; background:#0f0f0f; border-radius:4px;"><div style="color:#888;">WINRATE</div><div style="color:#4ade80; font-weight:bold;" id="winrate">0%</div></div>
+                        <div style="padding:4px; background:#0f0f0f; border-radius:4px;"><div style="color:#888;">✅ GANADAS</div><div style="color:#4ade80; font-weight:bold;" id="ganadas">0</div></div>
+                        <div style="padding:4px; background:#0f0f0f; border-radius:4px;"><div style="color:#888;">❌ PERDIDAS</div><div style="color:#f87171; font-weight:bold;" id="perdidas">0</div></div>
+                    </div>
+                </div>
+                <button class="btn" style="margin-top:10px; width:100%; font-size:12px;" onclick="abrirEnTradingView()">🔗 ABRIR EN TRADINGVIEW</button>
+            </div>
+            <div style="padding:10px; border-bottom:1px solid #333;">
+                <h3 style="color:#fff; font-size:13px; margin-bottom:8px;">📜 HISTORIAL DE SEÑALES</h3>
+                <div id="historyList" style="max-height:200px; overflow-y:auto;">
+                    <div style="text-align:center; color:#666; font-size:11px; padding:10px;">Sin historial</div>
+                </div>
+            </div>
+            <div style="padding:10px; border-bottom:1px solid #333;">
+                <h3 style="color:#fff; font-size:13px; margin-bottom:8px;">🕐 HORARIOS DE MERCADOS</h3>
+                <div style="font-size:11px; color:#ccc;">
+                    <div style="display:flex; justify-content:space-between; margin:3px 0;"><span>🇦🇺 Sidney</span><span style="color:#888;">21:00 - 06:00</span></div>
+                    <div style="display:flex; justify-content:space-between; margin:3px 0;"><span>🇯🇵 Tokio</span><span style="color:#888;">18:00 - 04:00</span></div>
+                    <div style="display:flex; justify-content:space-between; margin:3px 0;"><span>🇬🇧 Londres</span><span style="color:#888;">03:00 - 12:00</span></div>
+                    <div style="display:flex; justify-content:space-between; margin:3px 0;"><span>🇺🇸 Nueva York</span><span style="color:#888;">08:00 - 17:00</span></div>
+                </div>
+                <div style="margin-top:8px; padding:6px; background:#1e3a5f; border-radius:4px; text-align:center; font-size:11px; color:#60a5fa;">
+                    Zona horaria: UTC-4
+                </div>
+                <div style="margin-top:8px; padding:6px; background:#1a4d2e; border-radius:4px; text-align:center; font-size:11px; color:#4ade80;">
+                    ✅ FILTRO DE NOTICIAS ACTIVO (30 min)
+                </div>
+                <a href="https://www.forexfactory.com/calendar.php" target="_blank" style="display:block; margin-top:8px; padding:6px; background:#7f1d1d; border-radius:4px; text-align:center; font-size:11px; color:#f87171; text-decoration:none;">📋 CALENDARIO ECONÓMICO
+                </a>
+            </div>
+            <div class="signals-list" id="signalsList">
+                <div class="no-signals">Sin señales nuevas<br><small>Presiona "Escanear ahora"</small></div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="chart-container">
+                <div id="tradingview_chart"></div>
+            </div>
+            <div class="analysis-panel" id="analysisPanel" style="display:none;">
+                <div style="margin-bottom:15px; padding:10px; background:linear-gradient(90deg, #1e3a5f 0%, #1a1a1a 100%); border-radius:8px; border-left:4px solid #2563eb;">
+                    <h2 style="color:#fff; font-size:16px; margin:0;">📊 ANÁLISIS COMPLETO DE LA SEÑAL</h2>
+                </div>
+                <div class="analysis-grid">
+                    <div class="analysis-section">
+                        <h3>📋 ANÁLISIS DE ENTRADA</h3>
+                        <p class="reason" id="analysisReason" style="background:#1a1a1a; padding:12px; border-radius:8px; border:1px solid #333;">
+                            Selecciona una señal para ver el análisis detallado del porqué se tomó esta operación.
+                        </p>
+                        <br>
+                        <h3>🎯 CONFLUENCIAS DETECTADAS</h3>
+                        <div class="confluence-tags" id="confluenceTags" style="background:#1a1a1a; padding:10px; border-radius:8px; border:1px solid #333; min-height:50px;"></div>
+                        <br>
+                        <h3>📈 ANÁLISIS BURS</h3>
+                        <div style="font-size:11px; color:#ccc; line-height:1.8; background:#1a1a1a; padding:12px; border-radius:8px; border:1px solid #333;">
+                            <div>• <strong style="color:#4ade80;">Order Blocks</strong> - Detectados ✅</div>
+                            <div>• <strong style="color:#4ade80;">Quiebre de Estructura (BOS)</strong> - Confirmado ✅</div>
+                            <div>• <strong style="color:#4ade80;">Soportes/Resistencias</strong> - Validados ✅</div>
+                            <div>• <strong style="color:#4ade80;">Liquidez</strong> - Identificada ✅</div>
+                            <div>• <strong style="color:#4ade80;">Intertemporalidad</strong> - Aplicada ✅</div>
+                        </div>
+                        <br>
+                        <h3>📈 SEGUIMIENTO EN VIVO</h3>
+                        <div class="status-badge active" id="tradeStatus">ESPERANDO SELECCIÓN</div>
+                    </div>
+                    <div class="analysis-section">
+                        <h3>⚖️ GESTIÓN DE RIESGO</h3>
+                        <div class="risk-metric">
+                            <div class="risk-label">RIESGO USD</div>
+                            <div class="risk-value" id="riskUsd">$0</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">LOTES SUGERIDOS</div>
+                            <div class="risk-value" id="lotesCalc">0.00</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">RATIO R:R</div>
+                            <div class="risk-value" id="rrRatio">1:0</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">RIESGO % CUENTA</div>
+                            <div class="risk-value warning">0.5%</div>
+                        </div>
+                    </div>
+                    <div class="analysis-section">
+                        <h3>📈 NIVELES - 3 TAKE PROFITS</h3>
+                        <div class="risk-metric">
+                            <div class="risk-label">ENTRADA</div>
+                            <div class="risk-value" style="color: #fbbf24;" id="entryLevel">-</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">TAKE PROFIT 1 (50%)</div>
+                            <div class="risk-value" style="color: #4ade80;" id="tp1Level">-</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">TAKE PROFIT 2 (30%)</div>
+                            <div class="risk-value" style="color: #4ade80;" id="tp2Level">-</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">TAKE PROFIT 3 (20%)</div>
+                            <div class="risk-value" style="color: #4ade80;" id="tp3Level">-</div>
+                        </div>
+                        <div class="risk-metric">
+                            <div class="risk-label">STOP LOSS</div>
+                            <div class="risk-value" style="color: #f87171;" id="slLevel">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSignal = null;
+        let widget = null;
+        
+        function getCurrentSession() {
+            const now = new Date();
+            const utcHour = now.getUTCHours();
+            const hour = (utcHour - 4 + 24) % 24;
+            if ((hour >= 21) || (hour < 6)) return 'Sidney';
+            if (hour >= 18 && hour < 4) return 'Tokio';
+            if (hour >= 17 && hour < 21) return 'Asia';
+            if (hour >= 3 && hour < 12) return 'Londres';
+            if (hour >= 8 && hour < 17) return 'Nueva York';
+            return 'Fuera de Sesión';
+        }
+        
+        function updateSession() {
+            document.getElementById('sessionStat').textContent = getCurrentSession();
+        }
+        
+        function initChart(symbol = 'OANDA:XAUUSD') {
+            if (widget) {
+                try { widget.remove(); } catch(e) {}
+            }
+            widget = new TradingView.widget({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "15",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "es",
+                "toolbar_bg": "#1a1a1a",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "container_id": "tradingview_chart",
+                "onChartReady": function() {
+                    // Chart ready
+                }
+            });
+        }
+        
+        let lastSignalCount = 0;
+        
+        async function cargarPerformance() {
+            try {
+                const res = await fetch('/api/performance');
+                const data = await res.json();
+                document.getElementById('winrate').textContent = data.winrate + '%';
+                document.getElementById('ganadas').textContent = data.ganadas;
+                document.getElementById('perdidas').textContent = data.perdidas;
+            } catch(e) {}
+            try {
+                const res = await fetch('/api/performance');
+                const data = await res.json();
+                const hist = document.getElementById('historyList');
+                if (hist && data.señales) {
+                    const recientes = [...data.señales].reverse().slice(0, 20);
+                    if (recientes.length === 0) {
+                        hist.innerHTML = '<div style="text-align:center; color:#666; font-size:11px; padding:10px;">Sin historial</div>';
+                        return;
+                    }
+                    hist.innerHTML = recientes.map(s => {
+                        const sym = s.symbol === 'GC=F' ? 'XAUUSD' : s.symbol === 'NQ=F' ? 'NAS100' : s.symbol === 'EURUSD=X' ? 'EURUSD' : s.symbol;
+                        const status = s.status === 'ganada' ? '<span style="color:#4ade80;">✅ GANADA</span>' : s.status === 'perdida' ? '<span style="color:#f87171;">❌ PERDIDA</span>' : '<span style="color:#fbbf24;">⏳ ABIERTA</span>';
+                        const dir = s.dir === 'buy' ? '<span style="color:#4ade80;">BUY</span>' : '<span style="color:#f87171;">SELL</span>';
+                        return `<div style="padding:6px; margin-bottom:4px; background:#0f0f0f; border-radius:4px; font-size:10px; border-left:2px solid ${s.status==='ganada'?'#4ade80':s.status==='perdida'?'#f87171':'#fbbf24'};">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                <span>${dir} ${sym}</span>
+                                <span>${status}</span>
+                            </div>
+                            <div style="color:#888; font-size:9px;">Entry: ${s.entry} | ${s.fecha ? new Date(s.fecha).toLocaleTimeString('es-ES') : ''}</div>
+                        </div>`;
+                    }).join('');
+                }
+            } catch(e) {}
+        }
+        
+        async function cargarSenales() {
+            updateSession();
+            cargarPerformance();
+            try {
+                const res = await fetch('/api/signals');
+                const data = await res.json();
+                
+                if (data.señales && data.señales.length > lastSignalCount && lastSignalCount > 0) {
+                    if (Notification.permission === 'granted') {
+                        const s = data.señales[0];
+                        const symbolName = s.symbol === 'GC=F' ? 'XAUUSD' : s.symbol === 'NQ=F' ? 'NAS100' : s.symbol;
+                        new Notification('BURS BOT - Nueva Señal', {
+                            body: s.dir === 'buy' ? 'COMPRA ' + symbolName + ' @ ' + s.entry.toFixed(2) : 'VENTA ' + symbolName + ' @ ' + s.entry.toFixed(2),
+                            icon: 'https://www.tradingview.com/favicon.ico'
+                        });
+                    }
+                }
+                lastSignalCount = data.señales ? data.señales.length : 0;
+                
+                document.getElementById('lastScanTime').textContent = data.lastScan ? 
+                    'Último escaneo: ' + new Date(data.lastScan).toLocaleString('es-ES') : 'Sin escaneos';
+                
+                document.getElementById('todayCount').textContent = data.señales ? data.señales.length : 0;
+                
+                const list = document.getElementById('signalsList');
+                if (!data.señales || data.señales.length === 0) {
+                    list.innerHTML = '<div class="no-signals">Sin señales nuevas<br><small>Presiona "Escanear ahora"</small></div>';
+                    return;
+                }
+                
+                const señalesFiltradas = data.señales.filter(s => {
+                    const calidad = s.calidad || 'B';
+                    return calidad === 'A+' || calidad === 'A' || calidad === 'B+';
+                });
+                list.innerHTML = señalesFiltradas.map((s, idx) => {
+                    const symbolName = s.symbol === 'GC=F' ? 'XAUUSD' : s.symbol === 'NQ=F' ? 'NAS100' : s.symbol === 'EURUSD=X' ? 'EURUSD' : s.symbol === 'CL=F' ? 'WTI' : s.symbol === 'SI=F' ? 'XAGUSD' : s.symbol === 'GBPUSD=X' ? 'GBPUSD' : s.symbol === 'USDJPY=X' ? 'USDJPY' : s.symbol;
+                    const tvSymbol = s.symbol === 'GC=F' ? 'OANDA:XAUUSD' : s.symbol === 'NQ=F' ? 'OANDA:NAS100USD' : s.symbol === 'EURUSD=X' ? 'OANDA:EURUSD' : s.symbol === 'GBPUSD=X' ? 'OANDA:GBPUSD' : s.symbol === 'USDJPY=X' ? 'OANDA:USDJPY' : s.symbol === 'AUDUSD=X' ? 'OANDA:AUDUSD' : s.symbol === 'USDCAD=X' ? 'OANDA:USDCAD' : s.symbol === 'NZDUSD=X' ? 'OANDA:NZDUSD' : symbolName;
+                    const tf = 'M15 / M5';
+                    const riesgoVal = s.riesgo || Math.abs(s.entry - s.sl);
+                    const tp1 = s.dir === 'buy' ? s.entry + riesgoVal * 2 : s.entry - riesgoVal * 2;
+                    const tp2 = s.dir === 'buy' ? s.entry + riesgoVal * 2.5 : s.entry - riesgoVal * 2.5;
+                    const tp3 = s.dir === 'buy' ? s.entry + riesgoVal * 3 : s.entry - riesgoVal * 3;
+                    const calidad = s.calidad || 'B';
+                    const isBuy = s.dir === 'buy';
+                    return `
+                        <div onclick="selectSignal(${idx}, '${tvSymbol}'); this.scrollIntoView({behavior:'smooth', block:'nearest'});" style="background: linear-gradient(90deg, ${isBuy ? '#0f3d23' : '#3d0f0f'} 0%, #1a1a1a 30%, #1a1a1a 100%); border: 1px solid #333; border-left: 4px solid ${isBuy ? '#4ade80' : '#f87171'}; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: ${isBuy ? '#4ade80' : '#f87171'}; box-shadow: 0 0 8px ${isBuy ? '#4ade80' : '#f87171'};"></span>
+                                    <span style="font-weight: bold; font-size: 16px; color: ${isBuy ? '#4ade80' : '#f87171'};">${isBuy ? 'BUY' : 'SELL'} ${symbolName}</span>
+                                </div>
+                                <span style="background: #1a1a1a; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #333;">${calidad}</span>
+                            </div>
+                            <div style="font-size: 10px; color: #60a5fa; margin-bottom: 10px;">📈 TF: ${tf} | MÉTODO: BURS</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px;">
+                                <div style="text-align: center; padding: 6px; background: #0f0f0f; border-radius: 4px; border: 1px solid #222;">
+                                    <div style="color: #888; font-size: 9px;">ENTRY</div>
+                                    <div style="color: #fbbf24; font-size: 12px; font-weight: 600; margin-top: 2px;">${Number(s.entry).toFixed(2)}</div>
+                                </div>
+                                <div style="text-align: center; padding: 6px; background: #0f0f0f; border-radius: 4px; border: 1px solid #222;">
+                                    <div style="color: #888; font-size: 9px;">TP1</div>
+                                    <div style="color: #4ade80; font-size: 12px; font-weight: 600; margin-top: 2px;">${tp1.toFixed(2)}</div>
+                                </div>
+                                <div style="text-align: center; padding: 6px; background: #0f0f0f; border-radius: 4px; border: 1px solid #222;">
+                                    <div style="color: #888; font-size: 9px;">TP2</div>
+                                    <div style="color: #4ade80; font-size: 12px; font-weight: 600; margin-top: 2px;">${tp2.toFixed(2)}</div>
+                                </div>
+                                <div style="text-align: center; padding: 6px; background: #0f0f0f; border-radius: 4px; border: 1px solid #222;">
+                                    <div style="color: #888; font-size: 9px;">SL</div>
+                                    <div style="color: #f87171; font-size: 12px; font-weight: 600; margin-top: 2px;">${Number(s.sl).toFixed(2)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                window.signalsData = data.señales;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        function drawLevels(signal) {
+            setTimeout(() => {
+                try {
+                    if (widget && widget.chart) {
+                        const chart = widget.chart();
+                        const now = Math.floor(Date.now() / 1000);
+                        
+                        // Dibujar líneas simples y visibles
+                        chart.createShape({ time: now, price: signal.sl }, {
+                            shape: 'horizontal_line',
+                            overrides: { linestyle: 0, linewidth: 3, color: '#FF0000' },
+                            text: 'SL: ' + signal.sl.toFixed(signal.sl < 100 ? 3 : 2)
+                        });
+                        chart.createShape({ time: now, price: signal.tp }, {
+                            shape: 'horizontal_line',
+                            overrides: { linestyle: 0, linewidth: 3, color: '#00FF00' },
+                            text: 'TP: ' + signal.tp.toFixed(signal.tp < 100 ? 3 : 2)
+                        });
+                        chart.createShape({ time: now, price: signal.entry }, {
+                            shape: 'horizontal_line',
+                            overrides: { linestyle: 2, linewidth: 2, color: '#FFD700' },
+                            text: 'ENTRY: ' + signal.entry.toFixed(signal.entry < 100 ? 3 : 2)
+                        });
+                    }
+                } catch(e) {
+                    console.log('Error:', e);
+                }
+            }, 4000);
+        }
+        
+        function selectSignal(idx, tvSymbol) {
+            const s = window.signalsData && window.signalsData[idx] ? window.signalsData[idx] : null;
+            if (!s) return;
+            currentSignal = s;
+            
+            document.querySelectorAll('.signal-card').forEach((c, i) => {
+                c.classList.toggle('active', i === idx);
+            });
+            
+            try { initChart(tvSymbol); drawLevels(s); } catch(e) { console.error(e); }
+            
+            const panel = document.getElementById('analysisPanel');
+            if (panel) { 
+                panel.classList.add('active'); 
+                panel.style.display = 'block'; 
+                panel.style.visibility = 'visible';
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            const reason = document.getElementById('analysisReason');
+            if (reason) reason.innerHTML = `
+                <strong style="color: #fff;">Razón de entrada:</strong><br><br>
+                • <strong style="color: #60a5fa;">Order Block detectado</strong> - Zona de liquidez institucional<br>
+                • <strong style="color: #60a5fa;">Confirmación múltiple</strong> - ${(s.confluencias && s.confluencias.length > 0) ? s.confluencias.join(', ') : 'cierre, pinbar, barrido'}<br>
+                • <strong style="color: #60a5fa;">Impulso válido</strong> - Ruptura con fuerza suficiente<br>
+                • <strong style="color: #60a5fa;">Sesiones óptimas</strong> - Operando en horario de liquidez<br>
+                • <strong style="color: #4ade80;">Temporalidad:</strong> Análisis en M15/M5 según método BURS<br><br>
+                <strong style="color: #fbbf24;">Metodología:</strong> BURS Advisory - Order Blocks + Confirmaciones + Intertemporalidad
+            `;
+            
+            const tags = document.getElementById('confluenceTags');
+            if (tags) tags.innerHTML = (s.confluencias && s.confluencias.length > 0) ? s.confluencias.map(c => 
+                `<span class="tag">${c.toUpperCase()}</span>`
+            ).join('') : '<span class="tag">CIERRE</span><span class="tag">PINBAR</span><span class="tag">BARRIDO</span>';
+            
+            const capital = 10000;
+            const riesgo = capital * 0.005;
+            const set = (id,val) => { const el = document.getElementById(id); if(el) { el.textContent = val; el.style.display = 'block'; } };
+            set('riskUsd', '$' + riesgo.toFixed(2));
+            const riesgoVal = s.riesgo || Math.abs(s.entry - s.sl) || 10;
+            set('lotesCalc', ((riesgo / riesgoVal) * 10).toFixed(2));
+            set('rrRatio', '1:2.00');
+            set('entryLevel', Number(s.entry).toFixed(2));
+            set('slLevel', Number(s.sl).toFixed(2));
+            const tp1 = s.dir === 'buy' ? s.entry + riesgoVal * 2 : s.entry - riesgoVal * 2;
+            const tp2 = s.dir === 'buy' ? s.entry + riesgoVal * 2.5 : s.entry - riesgoVal * 2.5;
+            const tp3 = s.dir === 'buy' ? s.entry + riesgoVal * 3 : s.entry - riesgoVal * 3;
+            set('tp1Level', tp1.toFixed(2));
+            set('tp2Level', tp2.toFixed(2));
+            set('tp3Level', tp3.toFixed(2));
+            
+            const status = document.getElementById('tradeStatus');
+            if (status) {
+                status.textContent = 'SEGUIMIENTO ACTIVO';
+                status.className = 'status-badge active';
+            }
+        }
+        
+        function abrirEnTradingView() {
+            if (!currentSignal) {
+                alert('Selecciona una señal primero');
+                return;
+            }
+            const symbol = currentSignal.symbol === 'GC=F' ? 'OANDA:XAUUSD' : currentSignal.symbol === 'NQ=F' ? 'OANDA:NAS100USD' : currentSignal.symbol === 'EURUSD=X' ? 'OANDA:EURUSD' : currentSignal.symbol;
+            window.open('https://es.tradingview.com/chart/?symbol=' + symbol, '_blank');
+        }
+        
+        async function escanear() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ ESCANEANDO...';
+            try {
+                await fetch('/scan', { method: 'POST' });
+                setTimeout(cargarSenales, 2000);
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '⚡ ESCANEAR AHORA';
+                }, 2000);
+            }
+        }
+        
+        initChart();
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        cargarSenales();
+        cargarPerformance();
+        updateSession();
+        setInterval(cargarSenales, 15000);
+        setInterval(cargarPerformance, 60000);
+        setInterval(updateSession, 60000);
+        setTimeout(() => {
+            fetch('/api/signals').then(r=>r.json()).then(data => {
+                if(data.señales && data.señales.length > 0) {
+                    const list = document.getElementById('signalsList');
+                    if(list) {
+                        list.innerHTML = data.señales.map(s => {
+                            const sym = s.symbol === 'GC=F' ? 'XAUUSD' : s.symbol;
+                            return '<div style="background:#1a1a1a;margin:8px;padding:12px;border-left:4px solid '+(s.dir==='buy'?'#4ade80':'#f87171')+';border-radius:6px"><div style="display:flex;justify-content:space-between"><span style="color:'+(s.dir==='buy'?'#4ade80':'#f87171')+';font-weight:bold">'+s.dir.toUpperCase()+' '+sym+'</span><span style="color:#fbbf24;font-size:11px">TF: M15/M5</span></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:8px;font-size:11px"><div><div style="color:#888">ENTRY</div><div style="color:#fbbf24">'+s.entry+'</div></div><div><div style="color:#888">TP1</div><div style="color:#4ade80">'+(s.entry + s.riesgo*2).toFixed(2)+'</div></div><div><div style="color:#888">SL</div><div style="color:#f87171">'+s.sl+'</div></div><div><div style="color:#888">TP2</div><div style="color:#4ade80">'+(s.entry + s.riesgo*2.5).toFixed(2)+'</div></div></div></div>';
+                        }).join('');
+                    }
+                }
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

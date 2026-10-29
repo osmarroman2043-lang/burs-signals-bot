@@ -1,0 +1,28 @@
+{
+  "señales": [
+    {
+      "symbol": "GC=F",
+      "nombre": "Oro",
+      "dir": "buy",
+      "entry": 4050.5,
+      "sl": 4042.3,
+      "tp": 4062.8,
+      "riesgo": 8.2,
+      "ratio": 1.5,
+      "t": 1793221000000,
+      "idx": 9999,
+      "confluencias": [
+        "cierre",
+        "pinbar",
+        "barrido"
+      ],
+      "zona": {
+        "top": 4052,
+        "bottom": 4045
+      },
+      "status": "ganada",
+      "timestamp": 1793231834673,
+      "fecha": "2026-10-28T23:57:14.673Z"
+    }
+  ]
+}

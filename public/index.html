@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jarvis</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%2300e5ff'/></svg>" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <h1>JARVIS</h1>
+        <span id="status" class="pill" data-state="idle">en espera</span>
+      </header>
+
+      <section class="stage">
+        <button id="orb" class="orb" aria-label="Hablar con Jarvis">
+          <span class="orb-core"></span>
+          <span class="orb-ring"></span>
+        </button>
+        <p id="hint" class="hint">Tocá el círculo y hablá.</p>
+        <p id="heard" class="heard"></p>
+      </section>
+
+      <section id="banner" class="banner" hidden>
+        <strong>Falta el cerebro.</strong>
+        <span>Copiá <code>.env.example</code> a <code>.env</code>, pegá tu clave en <code>OPENAI_API_KEY</code> y reiniciá el servidor.</span>
+      </section>
+
+      <form id="composer" class="composer">
+        <input id="text" type="text" autocomplete="off" placeholder="O escribile acá…" />
+        <button type="submit">Enviar</button>
+      </form>
+
+      <section class="controls">
+        <label>
+          <span>Voz</span>
+          <select id="voice"></select>
+        </label>
+        <label class="switch">
+          <input id="continuous" type="checkbox" />
+          <span>Modo continuo (decí «Jarvis»)</span>
+        </label>
+        <button id="reset" type="button" class="ghost">Borrar charla</button>
+      </section>
+
+      <section class="log">
+        <h2>Conversación</h2>
+        <ol id="log"></ol>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+{
+  "estrategia": "burs",
+  "cuenta": {
+    "capital": 10000,
+    "riesgoPct": 0.5,
+    "riesgoPctCuentaPequena": 0.5,
+    "umbralCuentaPequena": 1000
+  },
+  "sesiones": {
+    "offsetUtc": -4,
+    "permitidas": ["sidney", "asia", "tokio", "londres", "ny"],
+    "forzarFiltro": true
+  },
+  "metodo": {
+    "pivote": 2,
+    "atrPeriodo": 14,
+    "fuerzaImpulsoAtr": 1.5,
+    "confluenciasMinimas": 2,
+    "bufferSlAtr": 0.25,
+    "ratioTp": 2,
+    "maxToquesZona": 0,
+    "ventanaConfirmacion": 3,
+    "lookbackVelaContraria": 15,
+    "porSesion": {
+      "sidney": { "confluenciasMinimas": 3, "fuerzaImpulsoAtr": 1.8, "ratioTp": 2 },
+      "asia": { "confluenciasMinimas": 3, "fuerzaImpulsoAtr": 1.8, "ratioTp": 2 },
+      "tokio": { "confluenciasMinimas": 3, "fuerzaImpulsoAtr": 1.8, "ratioTp": 2 },
+      "londres": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.5, "ratioTp": 2 },
+      "ny": { "confluenciasMinimas": 2, "fuerzaImpulsoAtr": 1.5, "ratioTp": 2 }
+    }
+  },
+  "simbolos": [
+    {
+      "id": "NQ=F",
+      "nombre": "Nasdaq 100",
+      "unidad": 1,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["ny"]
+    },
+    {
+      "id": "ES=F",
+      "nombre": "S&P 500",
+      "unidad": 1,
+      "valorUnidad": 50,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["ny"]
+    },
+    {
+      "id": "GC=F",
+      "nombre": "Oro",
+      "unidad": 1,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres", "ny"]
+    },
+    {
+      "id": "SI=F",
+      "nombre": "Plata",
+      "unidad": 1,
+      "valorUnidad": 25,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres", "ny"]
+    },
+    {
+      "id": "CL=F",
+      "nombre": "Petróleo",
+      "unidad": 1,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres", "ny"]
+    },
+    {
+      "id": "EURUSD=X",
+      "nombre": "EUR/USD",
+      "unidad": 0.0001,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres", "ny"]
+    },
+    {
+      "id": "GBPUSD=X",
+      "nombre": "GBP/USD",
+      "unidad": 0.0001,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres", "ny"]
+    },
+    {
+      "id": "USDJPY=X",
+      "nombre": "USD/JPY",
+      "unidad": 0.01,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["asia", "tokio", "londres"]
+    },
+    {
+      "id": "AUDUSD=X",
+      "nombre": "AUD/USD",
+      "unidad": 0.0001,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["sidney", "asia"]
+    },
+    {
+      "id": "NZDUSD=X",
+      "nombre": "NZD/USD",
+      "unidad": 0.0001,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["sidney", "asia"]
+    },
+    {
+      "id": "USDCAD=X",
+      "nombre": "USD/CAD",
+      "unidad": 0.0001,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["ny", "londres"]
+    },
+    {
+      "id": "EURGBP=X",
+      "nombre": "EUR/GBP",
+      "unidad": 0.0001,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres"]
+    },
+    {
+      "id": "EURJPY=X",
+      "nombre": "EUR/JPY",
+      "unidad": 0.01,
+      "valorUnidad": 10,
+      "intervalo": "15m",
+      "rango": "60d",
+      "sesiones": ["londres", "asia"]
+    }
+  ],
+  "noticias": {
+    "bloquear": true,
+    "ventanaMin": 30
+  },
+  "servidor": {
+    "puerto": 4322,
+    "secreto": ""
+  },
+  "telegram": {
+    "token": "",
+    "chatId": ""
+  }
+}
