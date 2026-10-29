@@ -289,11 +289,13 @@
                         hist.innerHTML = '<div style="text-align:center; color:#666; font-size:11px; padding:10px;">Sin historial</div>';
                         return;
                     }
-                    hist.innerHTML = recientes.map(s => {
+                    window._historySignals = recientes;
+                    hist.innerHTML = recientes.map((s, idx) => {
                         const sym = s.symbol === 'GC=F' ? 'XAUUSD' : s.symbol === 'NQ=F' ? 'NAS100' : s.symbol === 'EURUSD=X' ? 'EURUSD' : s.symbol;
+                        const tvSymbol = s.symbol === 'GC=F' ? 'OANDA:XAUUSD' : s.symbol === 'NQ=F' ? 'OANDA:NAS100USD' : s.symbol === 'EURUSD=X' ? 'OANDA:EURUSD' : sym;
                         const status = s.status === 'ganada' ? '<span style="color:#4ade80;">✅ GANADA</span>' : s.status === 'perdida' ? '<span style="color:#f87171;">❌ PERDIDA</span>' : '<span style="color:#fbbf24;">⏳ ABIERTA</span>';
                         const dir = s.dir === 'buy' ? '<span style="color:#4ade80;">BUY</span>' : '<span style="color:#f87171;">SELL</span>';
-                        return `<div style="padding:6px; margin-bottom:4px; background:#0f0f0f; border-radius:4px; font-size:10px; border-left:2px solid ${s.status==='ganada'?'#4ade80':s.status==='perdida'?'#f87171':'#fbbf24'};">
+                        return `<div onclick="selectHistorySignal(${idx}, '${tvSymbol}')" style="padding:6px; margin-bottom:4px; background:#0f0f0f; border-radius:4px; font-size:10px; border-left:2px solid ${s.status==='ganada'?'#4ade80':s.status==='perdida'?'#f87171':'#fbbf24'}; cursor:pointer;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                                 <span>${dir} ${sym}</span>
                                 <span>${status}</span>
@@ -415,6 +417,19 @@
                     console.log('Error:', e);
                 }
             }, 4000);
+        }
+        
+        function selectHistorySignal(idx, tvSymbol) {
+            const s = window._historySignals && window._historySignals[idx] ? window._historySignals[idx] : null;
+            if (!s) return;
+            if (!window.signalsData) window.signalsData = [];
+            // Add to signalsData if not present
+            const exists = window.signalsData.findIndex(x => x.symbol === s.symbol && Math.abs(x.entry - s.entry) < 0.01);
+            if (exists < 0) {
+                window.signalsData.unshift(s);
+                exists = 0;
+            }
+            selectSignal(exists, tvSymbol);
         }
         
         function selectSignal(idx, tvSymbol) {

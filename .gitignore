@@ -1,0 +1,13 @@
+.env
+.env.local
+.env.txt
+*.log
+.state/
+fomo-bot/
+bot-server.log
+bot-web.log
+bot.log
+check.log
+fomo-bot/fomo.log
+node_modules/
+.DS_Store
